@@ -1,5 +1,5 @@
 # Workflow
-![Alt text](pics\image.png)
+![Alt text](pics/image.png)
 
 ## Installation
 Just copy the script from the scripts folder above into the extensions folder of your 1111automatic installation. Then restart 1111automatic, by clicking the "Reload UI" button on the bottom of the page.
