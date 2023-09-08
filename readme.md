@@ -19,7 +19,7 @@ To use the extension you must be in the img2img panel. Then scroll down to the s
 - **1920**: This will create 1 1280x1920 picture with a denoising strength of 0.2. This is useful for finalizing.
 
 You also have 2 more parameters:
-- **Horizontal**: This will create horizontal pictures instead of vertical ones. It keeps the same logic and resolution of the phases.
+- **Orientation**: This will change the orientation of the pictures based on the phase x and y values. Leaving it to "guess" will let the extension decide the orientation based on the input.
 - **Force Denoising**: This forces a different denoising strength. This is useful if you want to use a different denoising strength than the one specified in the phase.
 
 The final section is related to managing the performance of the tool. The default values have been tested using an RTX 4080. If you have a less powerful GPU you'll probably need to change these. **You can also change these if you want a different resolution than the ones specified in the phases.**

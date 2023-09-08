@@ -15,10 +15,20 @@ class Script(scripts.Script):
 
     def show(self, is_img2img):
         return is_img2img
+    
+    def check_orientation(self, img):
+        """Check if image is portrait, landscape or square"""
+        x,y = img.size
+        if x/y > 1.2:
+            return 'Horizontal'
+        elif y/x > 1.2:
+            return 'Vertical'
+        else:
+            return 'Square'
 
     def ui(self, is_img2img):
         phase = gr.Radio(label='Phase', choices=["None",'768','1152','1920'], value="None")
-        horizontal = gr.Checkbox(label='Horizontal', value=False, elem_id=self.elem_id("horizontal"))
+        orientation = gr.Radio(label='Orientation', choices=["Guess","Horizontal", "Vertical", "Square"], value="Guess")
         force_denoising = gr.Checkbox(label='Force denoising', value=False, elem_id=self.elem_id("force_denoising"))
         denoising = gr.Slider(minimum=0.0, maximum=1.0, step=0.05, label='Denoising strength', value=0.5)
         with gr.Accordion("Performance", open = False):
@@ -36,9 +46,9 @@ class Script(scripts.Script):
                 with gr.Group():
                     phase_3_x = gr.Slider(minimum=0, maximum=1920, step=2, label='Phase 3 X', value=1280)
                     phase_3_y = gr.Slider(minimum=0, maximum=1920, step=2, label='Phase 3 Y', value=1920)
-        return [phase, force_denoising, denoising, horizontal, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y]
+        return [phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y]
 
-    def run(self, p, phase, force_denoising, denoising, horizontal, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y):
+    def run(self, p, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y):
         if phase == "768":
             p.width = int(phase_1_x)
             p.height = int(phase_1_y)
@@ -56,7 +66,13 @@ class Script(scripts.Script):
             p.denoising_strength = 0.2
         if force_denoising:
             p.denoising_strength = denoising
-        if horizontal:
+        init_image = p.init_images[0]
+        if orientation == "Guess":
+            orientation = self.check_orientation(init_image)
+            
+        if orientation == "Horizontal":
             p.width, p.height = p.height, p.width
+        elif orientation == "Square":
+            p.width = p.height = max(p.width, p.height)
         processed = process_images(p)
         return processed
