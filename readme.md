@@ -24,6 +24,13 @@ You also have 2 more parameters:
 
 The final section is related to managing the performance of the tool. The default values have been tested using an RTX 4080. If you have a less powerful GPU you'll probably need to change these. **You can also change these if you want a different resolution than the ones specified in the phases.**
 
+## Found an issue?  
+If you found an issue with the extension, please report it in the issues section of this repository or contribute to the code yourself.
+
+## Check out my other scripts
+- [Ranbooru](https://github.com/Inzaniak/sd-webui-ranbooru)
+- [Workflow](https://github.com/Inzaniak/sd-webui-workflow)
+
 ---
 ## Made by Inzaniak
 ![Alt text](pics/logo.png) 
