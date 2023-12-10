@@ -20,6 +20,7 @@ To use the extension you must be in the img2img panel. Then scroll down to the s
 
 You also have 2 more parameters:
 - **Orientation**: This will change the orientation of the pictures based on the phase x and y values. Leaving it to "guess" will let the extension decide the orientation based on the input.
+- **Ratio**: This will change the ratio of the pictures based on the phase x and y values. Base will use the same ratio as the input, while 2:1 will divide the x value by 2.
 - **Force Denoising**: This forces a different denoising strength. This is useful if you want to use a different denoising strength than the one specified in the phase.
 
 The final section is related to managing the performance of the tool. The default values have been tested using an RTX 4080. If you have a less powerful GPU you'll probably need to change these. **You can also change these if you want a different resolution than the ones specified in the phases.**

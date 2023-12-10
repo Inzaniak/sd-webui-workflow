@@ -29,6 +29,7 @@ class Script(scripts.Script):
     def ui(self, is_img2img):
         phase = gr.Radio(label='Phase', choices=["None",'768','1152','1920'], value="None")
         orientation = gr.Radio(label='Orientation', choices=["Guess","Horizontal", "Vertical", "Square"], value="Guess")
+        ratio = gr.Radio(label='Ratio', choices=["Base", "2:1"], value="Base")
         force_denoising = gr.Checkbox(label='Force denoising', value=False, elem_id=self.elem_id("force_denoising"))
         denoising = gr.Slider(minimum=0.0, maximum=1.0, step=0.05, label='Denoising strength', value=0.5)
         with gr.Accordion("Performance", open = False):
@@ -46,9 +47,10 @@ class Script(scripts.Script):
                 with gr.Group():
                     phase_3_x = gr.Slider(minimum=0, maximum=1920, step=2, label='Phase 3 X', value=1280)
                     phase_3_y = gr.Slider(minimum=0, maximum=1920, step=2, label='Phase 3 Y', value=1920)
-        return [phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y]
+        return [phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, ratio]
 
-    def run(self, p, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y):
+    def run(self, p, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, ratio):
+        
         if phase == "768":
             p.width = int(phase_1_x)
             p.height = int(phase_1_y)
@@ -69,7 +71,8 @@ class Script(scripts.Script):
         init_image = p.init_images[0]
         if orientation == "Guess":
             orientation = self.check_orientation(init_image)
-            
+        if ratio == "2:1":
+            p.width = p.height // 2
         if orientation == "Horizontal":
             p.width, p.height = p.height, p.width
         elif orientation == "Square":
