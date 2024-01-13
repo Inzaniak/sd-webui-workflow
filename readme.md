@@ -12,6 +12,8 @@ I've created this extension to help me streamline my creation workflow. With thi
 
 ## How to use
 ![Alt text](pics/screen.png)
+**THIS SECTION NEEDS TO BE UPDATED! FOLLOW THIS TUTORIAL IF YOU WANT TO KNOW ALL THE FEATURES:** [CivitAI](https://civitai.com/articles/3716)  
+
 To use the extension you must be in the img2img panel. Then scroll down to the script selection and select Workflow. Now you can select a phase:
 - **None**: This is the default phase. It bypasses the extension and lets you use img2img as usual.
 - **768**: This will create 4 512x768 pictures with a denoising strength of 0.5. This is useful for inpainting.
