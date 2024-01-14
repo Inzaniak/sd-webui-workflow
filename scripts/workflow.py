@@ -354,6 +354,10 @@ class Script(scripts.Script):
                         else:
                             image_mask.putpixel((x, y), 0)
                 init_image = init_image.convert('RGBA')
+            if p.image_mask is not None and image_mask is not None:
+                # if there are two image mask merge them using a logical AND
+                image_mask = ImageChops.multiply(p.image_mask, image_mask)
+                print("Merging masks")
             self.image_mask = image_mask
             if (p.inpainting_mask_invert and p.image_mask) or invert_mask:
                 image_mask = ImageChops.invert(image_mask)
