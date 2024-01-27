@@ -32,7 +32,7 @@ If you found an issue with the extension, please report it in the issues section
 
 ## Check out my other scripts
 - [Ranbooru](https://github.com/Inzaniak/sd-webui-ranbooru)
-- [Workflow](https://github.com/Inzaniak/sd-webui-workflow)
+- [Ranbooru for ComfyUI](https://github.com/Inzaniak/comfyui-ranbooru)
 
 ---
 ## Made by Inzaniak
