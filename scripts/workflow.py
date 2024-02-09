@@ -380,9 +380,9 @@ class Script(scripts.Script):
 
                 if chromatic_aberration:
                     if image_mask is not None:
-                        p.init_images[0] = add_chromatic_aberration_f(p.init_images[0], shift_amount)
-                    else:
                         p.init_images[0] = add_chromatic_aberration_f(p.init_images[0], shift_amount, image_mask)
+                    else:
+                        p.init_images[0] = add_chromatic_aberration_f(p.init_images[0], shift_amount)
 
                 if add_noise:
                     # check if noise_color is a hex

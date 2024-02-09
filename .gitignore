@@ -1,4 +1,5 @@
 .vscode/
 deploy.ps1
+deploy-copy.ps1
 __pycache__
 user
