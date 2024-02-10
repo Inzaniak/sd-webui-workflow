@@ -182,7 +182,7 @@ def save_settings(phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phas
 
 
 def load_settings(save_name):
-    phases = json.load(open(save_name))["phases"]
+    phases = json.load(open(os.path.join(user_settings_dir, f'{save_name}.json')))['phases']
     return phases[0]["batch"], phases[1]["batch"], phases[2]["batch"], phases[0]["x"], phases[0]["y"], phases[1]["x"], phases[1]["y"], phases[2]["x"], phases[2]["y"], phases[0]["denoising"], phases[1]["denoising"], phases[2]["denoising"]
 
 
