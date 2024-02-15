@@ -1,5 +1,6 @@
 import math
 import modules.scripts as scripts
+from modules.ui_components import InputAccordion
 import gradio as gr
 from PIL import Image, ImageChops
 import numpy as np
@@ -230,9 +231,8 @@ class Script(scripts.Script):
                 ratio = gr.Radio(label='Ratio', choices=["Base", "2:1"], value="Base")
                 force_denoising = gr.Checkbox(label='Force denoising', value=False, elem_id=self.elem_id("force_denoising"))
                 denoising = gr.Slider(minimum=0.0, maximum=1.0, step=0.05, label='Denoising strength', value=0.5)
-                with gr.Accordion("Extra", open=False):
+                with InputAccordion(False, label="Extras", elem_id=self.elem_id("ex_enable")) as enable_extras:
                     with gr.Group():
-                        enable_extras = gr.Checkbox(label='Enable extras', value=False)
                         with gr.Accordion("Overlay", open=False):
                             # Overlay
                             add_overlay = gr.Checkbox(label='Add overlay')
@@ -242,18 +242,16 @@ class Script(scripts.Script):
                             overlay_opacity = gr.Slider(minimum=0.05, maximum=1.0, step=0.05, label='Overlay opacity', value=0.5)
                             add_overlay.change(refresh_overlay_choices, [], overlay_image_path)
                             method_select.change(hide_if_not_blend, method_select, overlay_opacity)
-                        with gr.Accordion("Chromatic Aberration", open=False):
+                        # with gr.Accordion("Chromatic Aberration", open=False):
+                        with InputAccordion(False, label="Chromatic Aberration", elem_id=self.elem_id("ca_enable")) as chromatic_aberration:
                             # Chromatic aberration
-                            chromatic_aberration = gr.Checkbox(label='Chromatic aberration')
                             shift_amount = gr.Slider(minimum=1, maximum=100, step=1, label='Shift amount', value=1)
-                        with gr.Accordion("Noise", open=False):
+                        with InputAccordion(False, label="Noise", elem_id=self.elem_id("no_enable")) as add_noise:
                             # Noise
-                            add_noise = gr.Checkbox(label='Add noise')
                             noise_amount = gr.Slider(minimum=0.001, maximum=1.0, step=0.001, label='Noise Amount', value=0.010)
                             noise_color = gr.ColorPicker(label='Noise color', value='#ffffff')
-                        with gr.Accordion("Swap Pixels", open=False):
+                        with InputAccordion(False, label="Swap Pixels", elem_id=self.elem_id("sp_enable")) as swap_pixels:
                             # Swap
-                            swap_pixels = gr.Checkbox(label='Swap pixels')
                             swap_distance = gr.Slider(minimum=1, maximum=100, step=1, label='Swap distance', value=1)
                         with gr.Accordion("Flip", open=False):
                             # Flip
@@ -263,9 +261,8 @@ class Script(scripts.Script):
                             # Blur
                             blur_type = gr.Dropdown(label='Blur type', choices=["None", "gaussian", "box", "median"], value="None")
                             blur_radius = gr.Slider(minimum=0.1, maximum=10.0, step=0.1, label='Blur radius', value=1.0)
-                        with gr.Accordion("Sharpen", open=False):
+                        with InputAccordion(False, label="Sharpen", elem_id=self.elem_id("sh_enable")) as sharpen:
                             # Sharpen
-                            sharpen = gr.Checkbox(label='Sharpen')
                             sharpen_radius = gr.Slider(minimum=0.1, maximum=10.0, step=0.1, label='Sharpen radius', value=2.0)
                             sharpen_percent = gr.Slider(minimum=0, maximum=300, step=1, label='Sharpen percent', value=150)
                             sharpen_threshold = gr.Slider(minimum=1, maximum=255, step=1, label='Sharpen threshold', value=3)
@@ -379,7 +376,10 @@ class Script(scripts.Script):
                         p.init_images[0] = add_overlay_f(p.init_images[0], overlay_img, overlay_opacity, method_select, image_mask)
 
                 if chromatic_aberration:
-                    p.init_images[0] = add_chromatic_aberration_f(p.init_images[0], shift_amount, image_mask)
+                    if image_mask is not None:
+                        p.init_images[0] = add_chromatic_aberration_f(p.init_images[0], shift_amount, image_mask)
+                    else:
+                        p.init_images[0] = add_chromatic_aberration_f(p.init_images[0], shift_amount)
 
                 if add_noise:
                     # check if noise_color is a hex
