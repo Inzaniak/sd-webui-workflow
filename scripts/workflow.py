@@ -172,11 +172,11 @@ def calculate_distance(tuple_1, tuple_2):
     return math.sqrt((tuple_1[0] - tuple_2[0]) ** 2 + (tuple_1[1] - tuple_2[1]) ** 2 + (tuple_1[2] - tuple_2[2]) ** 2)
 
 
-def save_settings(phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_denoising, phase_2_denoising, phase_3_denoising, save_name):
+def save_settings(phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_denoising, phase_2_denoising, phase_3_denoising, phase_1_steps, phase_2_steps, phase_3_steps, save_name):
     settings_dict = {"phases": [
-        {"x": int(phase_1_x), "y": int(phase_1_y), "batch": int(phase_1_nr), "denoising": float(phase_1_denoising)},
-        {"x": int(phase_2_x), "y": int(phase_2_y), "batch": int(phase_2_nr), "denoising": float(phase_2_denoising)},
-        {"x": int(phase_3_x), "y": int(phase_3_y), "batch": int(phase_3_nr), "denoising": float(phase_3_denoising)},
+        {"x": int(phase_1_x), "y": int(phase_1_y), "batch": int(phase_1_nr), "denoising": float(phase_1_denoising), "steps": int(phase_1_steps)},
+        {"x": int(phase_2_x), "y": int(phase_2_y), "batch": int(phase_2_nr), "denoising": float(phase_2_denoising), "steps": int(phase_2_steps)},
+        {"x": int(phase_3_x), "y": int(phase_3_y), "batch": int(phase_3_nr), "denoising": float(phase_3_denoising), "steps": int(phase_3_steps)},
     ]}
     with open(os.path.join(user_settings_dir, f'{save_name}.json'), 'w', encoding='utf-8') as outfile:
         json.dump(settings_dict, outfile, ensure_ascii=False, indent=4)
@@ -184,7 +184,7 @@ def save_settings(phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phas
 
 def load_settings(save_name):
     phases = json.load(open(os.path.join(user_settings_dir, f'{save_name}.json')))['phases']
-    return phases[0]["batch"], phases[1]["batch"], phases[2]["batch"], phases[0]["x"], phases[0]["y"], phases[1]["x"], phases[1]["y"], phases[2]["x"], phases[2]["y"], phases[0]["denoising"], phases[1]["denoising"], phases[2]["denoising"]
+    return phases[0]["batch"], phases[1]["batch"], phases[2]["batch"], phases[0]["x"], phases[0]["y"], phases[1]["x"], phases[1]["y"], phases[2]["x"], phases[2]["y"], phases[0]["denoising"], phases[1]["denoising"], phases[2]["denoising"], phases[0].get("steps",20), phases[1].get("steps",20), phases[2].get("steps",20)
 
 
 def check_orientation(img):
@@ -212,9 +212,9 @@ class Script(scripts.Script):
 
     def init_settings(self):
         # initialize settings
-        self.settings = {"phases": [{"x": 512, "y": 768, "batch": 6, "denoising": 0.5},
-                                    {"x": 768, "y": 1152, "batch": 4, "denoising": 0.5},
-                                    {"x": 1280, "y": 1920, "batch": 1, "denoising": 0.2}]}
+        self.settings = {"phases": [{"x": 512, "y": 768, "batch": 6, "denoising": 0.5, "steps": 20},
+                                    {"x": 768, "y": 1152, "batch": 4, "denoising": 0.5, "steps": 20},
+                                    {"x": 1280, "y": 1920, "batch": 1, "denoising": 0.2, "steps": 20}]}
         try:
             default_settings = os.path.join(user_settings_dir, 'default.json')
             if os.path.isfile(default_settings):
@@ -291,31 +291,38 @@ class Script(scripts.Script):
                         phase_1_denoising = gr.Slider(minimum=0.0, maximum=1.0, step=0.05, label='Phase 1 Denoising', value=self.settings["phases"][0]["denoising"])
                         phase_2_denoising = gr.Slider(minimum=0.0, maximum=1.0, step=0.05, label='Phase 2 Denoising', value=self.settings["phases"][1]["denoising"])
                         phase_3_denoising = gr.Slider(minimum=0.0, maximum=1.0, step=0.05, label='Phase 3 Denoising', value=self.settings["phases"][2]["denoising"])
+                    with gr.Accordion("Sampling Steps", open=False):
+                        phase_1_steps = gr.Slider(label='Phase 1 Steps', value=self.settings["phases"][0].get("steps",20), minimum=1, maximum=100, step=1)
+                        phase_2_steps = gr.Slider(label='Phase 2 Steps', value=self.settings["phases"][0].get("steps",20), minimum=1, maximum=100, step=1)
+                        phase_3_steps = gr.Slider(label='Phase 3 Steps', value=self.settings["phases"][0].get("steps",20), minimum=1, maximum=100, step=1)
                     # save button
                     file_name = gr.Textbox(label="File Name", lines=1, value="default")
                     save_button = gr.Button(value="Save settings", type="button")
                     load_button = gr.Button(value="Load settings", type="button")
-                    save_button.click(save_settings, [phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_denoising, phase_2_denoising, phase_3_denoising, file_name], [])
-                    load_button.click(load_settings, [file_name], [phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_denoising, phase_2_denoising, phase_3_denoising])
-        return [phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, ratio, enable_extras, add_noise, noise_amount, noise_color, fx_preview, swap_pixels, swap_distance, chromatic_aberration, shift_amount, add_overlay, overlay_image_path, choose_custom_mask, choose_custom_mask_threshold, choose_custom_mask_color, overlay_opacity, method_select, return_mask, use_only_fx, overlay_img, invert_mask, flip_vertical, flip_horizontal, blur_type, blur_radius, sharpen, sharpen_percent, sharpen_radius, sharpen_threshold]
+                    save_button.click(save_settings, [phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_denoising, phase_2_denoising, phase_3_denoising, phase_1_steps, phase_2_steps, phase_3_steps, file_name], [])
+                    load_button.click(load_settings, [file_name], [phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_denoising, phase_2_denoising, phase_3_denoising, phase_1_steps, phase_2_steps, phase_3_steps])
+        return [phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_steps, phase_2_steps, phase_3_steps, ratio, enable_extras, add_noise, noise_amount, noise_color, fx_preview, swap_pixels, swap_distance, chromatic_aberration, shift_amount, add_overlay, overlay_image_path, choose_custom_mask, choose_custom_mask_threshold, choose_custom_mask_color, overlay_opacity, method_select, return_mask, use_only_fx, overlay_img, invert_mask, flip_vertical, flip_horizontal, blur_type, blur_radius, sharpen, sharpen_percent, sharpen_radius, sharpen_threshold]
 
-    def before_process(self, p, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, ratio, enable_extras, add_noise, noise_amount, noise_color, fx_preview, swap_pixels, swap_distance, chromatic_aberration, shift_amount, add_overlay, overlay_image_path, choose_custom_mask, choose_custom_mask_threshold, choose_custom_mask_color, overlay_opacity, method_select, return_mask, use_only_fx, overlay_img, invert_mask, flip_vertical, flip_horizontal, blur_type, blur_radius, sharpen, sharpen_percent, sharpen_radius, sharpen_threshold):
+    def before_process(self, p, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_steps, phase_2_steps, phase_3_steps, ratio, enable_extras, add_noise, noise_amount, noise_color, fx_preview, swap_pixels, swap_distance, chromatic_aberration, shift_amount, add_overlay, overlay_image_path, choose_custom_mask, choose_custom_mask_threshold, choose_custom_mask_color, overlay_opacity, method_select, return_mask, use_only_fx, overlay_img, invert_mask, flip_vertical, flip_horizontal, blur_type, blur_radius, sharpen, sharpen_percent, sharpen_radius, sharpen_threshold):
         if phase != "None":
             if phase == "768":
                 p.width = int(phase_1_x)
                 p.height = int(phase_1_y)
                 p.batch_size = int(phase_1_nr)
                 p.denoising_strength = 0.5
+                p.steps = int(phase_1_steps)
             elif phase == "1152":
                 p.width = int(phase_2_x)
                 p.height = int(phase_2_y)
                 p.batch_size = int(phase_2_nr)
                 p.denoising_strength = 0.5
+                p.steps = int(phase_2_steps)
             elif phase == "1920":
                 p.width = int(phase_3_x)
                 p.height = int(phase_3_y)
                 p.batch_size = int(phase_3_nr)
                 p.denoising_strength = 0.2
+                p.steps = int(phase_3_steps)
 
             if force_denoising:
                 p.denoising_strength = denoising
@@ -409,7 +416,7 @@ class Script(scripts.Script):
                 if fx_preview:
                     self.fx_preview = p.init_images[0]
 
-    def postprocess(self, p, processed, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, ratio, enable_extras, add_noise, noise_amount, noise_color, fx_preview, swap_pixels, swap_distance, chromatic_aberration, shift_amount, add_overlay, overlay_image_path, choose_custom_mask, choose_custom_mask_threshold, choose_custom_mask_color, overlay_opacity, method_select, return_mask, use_only_fx, overlay_img, invert_mask, flip_vertical, flip_horizontal, blur_type, blur_radius, sharpen, sharpen_percent, sharpen_radius, sharpen_threshold):
+    def postprocess(self, p, processed, phase, force_denoising, denoising, orientation, phase_1_nr, phase_2_nr, phase_3_nr, phase_1_x, phase_1_y, phase_2_x, phase_2_y, phase_3_x, phase_3_y, phase_1_steps, phase_2_steps, phase_3_steps, ratio, enable_extras, add_noise, noise_amount, noise_color, fx_preview, swap_pixels, swap_distance, chromatic_aberration, shift_amount, add_overlay, overlay_image_path, choose_custom_mask, choose_custom_mask_threshold, choose_custom_mask_color, overlay_opacity, method_select, return_mask, use_only_fx, overlay_img, invert_mask, flip_vertical, flip_horizontal, blur_type, blur_radius, sharpen, sharpen_percent, sharpen_radius, sharpen_threshold):
         if phase != "None":
             if return_mask and choose_custom_mask != "Default":
                 processed.images.append(self.image_mask)
